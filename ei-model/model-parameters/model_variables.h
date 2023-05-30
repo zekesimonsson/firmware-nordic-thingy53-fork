@@ -24,41 +24,36 @@
 
 #include <stdint.h>
 #include "model_metadata.h"
-#include "anomaly_clusters.h"
+
 #include "tflite-model/trained_model_compiled.h"
 #include "edge-impulse-sdk/classifier/ei_model_types.h"
 #include "edge-impulse-sdk/classifier/inferencing_engines/engines.h"
 
-const char* ei_classifier_inferencing_categories[] = { "idle", "snake", "updown", "wave" };
+const char* ei_classifier_inferencing_categories[] = { "blue", "green", "noise", "red", "unknown" };
 
-uint8_t ei_dsp_config_3_axes[] = { 0, 1, 2 };
-const uint32_t ei_dsp_config_3_axes_size = 3;
-ei_dsp_config_spectral_analysis_t ei_dsp_config_3 = {
+uint8_t ei_dsp_config_3_axes[] = { 0 };
+const uint32_t ei_dsp_config_3_axes_size = 1;
+ei_dsp_config_mfcc_t ei_dsp_config_3 = {
     3, // uint32_t blockId
-    2, // int implementationVersion
-    3, // int length of axes
-    1.0f, // float scale-axes
-    1, // int input-decimation-ratio
-    "low", // select filter-type
-    3.0f, // float filter-cutoff
-    6, // int filter-order
-    "FFT", // select analysis-type
-    128, // int fft-length
-    3, // int spectral-peaks-count
-    0.1f, // float spectral-peaks-threshold
-    "0.1, 0.5, 1.0, 2.0, 5.0", // string spectral-power-edges
-    false, // boolean do-log
-    true, // boolean do-fft-overlap
-    4, // int wavelet-level
-    "db4", // select wavelet
-    false // boolean extra-low-freq
+    4, // int implementationVersion
+    1, // int length of axes
+    13, // int num_cepstral
+    0.02f, // float frame_length
+    0.02f, // float frame_stride
+    32, // int num_filters
+    256, // int fft_length
+    101, // int win_size
+    0, // int low_frequency
+    0, // int high_frequency
+    0.98f, // float pre_cof
+    1 // int pre_shift
 };
 
 const size_t ei_dsp_blocks_size = 1;
 ei_model_dsp_t ei_dsp_blocks[ei_dsp_blocks_size] = {
     { // DSP block 3
-        27,
-        &extract_spectral_analysis_features,
+        650,
+        &extract_mfcc_features,
         (void*)&ei_dsp_config_3,
         ei_dsp_config_3_axes,
         ei_dsp_config_3_axes_size
@@ -85,25 +80,11 @@ const ei_learning_block_config_tflite_graph_t ei_learning_block_config_0 = {
     .graph_config = (void*)&ei_config_tflite_graph_0
 };
 
-const ei_learning_block_config_anomaly_kmeans_t ei_learning_block_config_1 = {
-    .implementation_version = 1,
-    .anom_axis = ei_classifier_anom_axes,
-    .anom_axes_size = 4,
-    .anom_clusters = ei_classifier_anom_clusters,
-    .anom_cluster_count = 32,
-    .anom_scale = ei_classifier_anom_scale,
-    .anom_mean = ei_classifier_anom_mean,
-};
-
-const size_t ei_learning_blocks_size = 2;
+const size_t ei_learning_blocks_size = 1;
 const ei_learning_block_t ei_learning_blocks[ei_learning_blocks_size] = {
     {
         &run_nn_inference,
         (void*)&ei_learning_block_config_0,
-    },
-    {
-        &run_kmeans_anomaly,
-        (void*)&ei_learning_block_config_1,
     },
 };
 
@@ -117,21 +98,21 @@ const ei_model_performance_calibration_t ei_calibration = {
 };
 
 
-const ei_impulse_t impulse_1033_6 = {
-    .project_id = 1033,
-    .project_owner = "Edge Impulse Profiling",
-    .project_name = "gestures-large",
-    .deploy_version = 6,
+const ei_impulse_t impulse_232549_1 = {
+    .project_id = 232549,
+    .project_owner = "Johan Simonsson",
+    .project_name = "spoken_colors",
+    .deploy_version = 1,
 
-    .nn_input_frame_size = 27,
-    .raw_sample_count = 125,
-    .raw_samples_per_frame = 3,
-    .dsp_input_frame_size = 125 * 3,
+    .nn_input_frame_size = 650,
+    .raw_sample_count = 16000,
+    .raw_samples_per_frame = 1,
+    .dsp_input_frame_size = 16000 * 1,
     .input_width = 0,
     .input_height = 0,
     .input_frames = 0,
-    .interval_ms = 16,
-    .frequency = 62.5,
+    .interval_ms = 0.0625,
+    .frequency = 16000,
     .dsp_blocks_size = ei_dsp_blocks_size,
     .dsp_blocks = ei_dsp_blocks,
     
@@ -141,7 +122,7 @@ const ei_impulse_t impulse_1033_6 = {
     .object_detection_last_layer = EI_CLASSIFIER_LAST_LAYER_UNKNOWN,
     .fomo_output_size = 0,
     
-    .tflite_output_features_count = 4,
+    .tflite_output_features_count = 5,
     .learning_blocks_size = ei_learning_blocks_size,
     .learning_blocks = ei_learning_blocks,
 
@@ -151,17 +132,17 @@ const ei_impulse_t impulse_1033_6 = {
     
     .compiled = 1,
 
-    .sensor = EI_CLASSIFIER_SENSOR_ACCELEROMETER,
-    .fusion_string = "accX + accY + accZ",
-    .slice_size = (125/4),
+    .sensor = EI_CLASSIFIER_SENSOR_MICROPHONE,
+    .fusion_string = "audio",
+    .slice_size = (16000/4),
     .slices_per_model_window = 4,
 
-    .has_anomaly = 1,
-    .label_count = 4,
+    .has_anomaly = 0,
+    .label_count = 5,
     .calibration = ei_calibration,
     .categories = ei_classifier_inferencing_categories
 };
 
-const ei_impulse_t ei_default_impulse = impulse_1033_6;
+const ei_impulse_t ei_default_impulse = impulse_232549_1;
 
 #endif // _EI_CLASSIFIER_MODEL_METADATA_H_
