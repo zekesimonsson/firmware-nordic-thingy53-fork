@@ -98,6 +98,8 @@ int main(void)
     at = ei_at_init();
     at->print_prompt();
 
+    ei_start_impulse(true, false);
+
     while(1) {
         while(uart_fifo_read(uart, &rcv_char, 1) == 1) {
             if(is_inference_running() && rcv_char == 'b') {

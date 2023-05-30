@@ -72,6 +72,23 @@ static void display_results(ei_impulse_result_t* result)
 {
     char *string = NULL;
 
+    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+        if (result->classification[ix].value > 0.8 ) {
+            if( 0 == strcmp("red", result->classification[ix].label) )
+            {
+                dev->set_state(eiStateRed);
+            }
+            if( 0 == strcmp("green", result->classification[ix].label) )
+            {
+                dev->set_state(eiStateGreen);
+            }
+            if( 0 == strcmp("blue", result->classification[ix].label) )
+            {
+                dev->set_state(eiStateBlue);
+            }
+        }
+    }
+    
     if(dev->get_serial_channel() == UART) {
         timing_and_classification(result);
     }

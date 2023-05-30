@@ -81,7 +81,10 @@ typedef enum
     eiStateErasingFlash,
     eiStateSampling,
     eiStateUploading,
-    eiStateFinished
+    eiStateFinished,
+    eiStateBlue,
+    eiStateGreen,
+    eiStateRed
 
 } EiState;
 

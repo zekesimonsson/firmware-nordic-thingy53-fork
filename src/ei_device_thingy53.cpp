@@ -250,6 +250,15 @@ void EiDeviceThingy53::set_state(EiState state)
     dk_set_led(LED_BLUE, 0);
 
     switch(state) {
+        case eiStateGreen:
+            dk_set_led(LED_GREEN, 1);
+            break;
+        case eiStateRed:
+            dk_set_led(LED_RED, 1);
+            break;
+        case eiStateBlue:
+            dk_set_led(LED_BLUE, 1);
+            break;
         case eiStateErasingFlash:
         case eiStateSampling:
         case eiStateUploading:
